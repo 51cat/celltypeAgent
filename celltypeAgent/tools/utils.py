@@ -12,13 +12,14 @@ def extract_top_genes(df, p_type_column, cluster_column, gene_column, ntop, fc_c
         df = pd.read_csv(df)
     
     df_filtered = df[df[p_type_column] < 0.05].copy()
-    
     top_genes = (
-        df_filtered.groupby(cluster_column, group_keys=False)
+        df_filtered.groupby(cluster_column, group_keys=True)
         .apply(lambda x: x.nlargest(ntop, fc_column))
-    )
-    result = top_genes[[cluster_column, gene_column, fc_column, p_type_column]]
-    return result.reset_index(drop=True)
+    ).reset_index()
+    print(top_genes)
+    result = top_genes[[cluster_column, gene_column]]#, fc_column, p_type_column]]
+    gene_dict = result.groupby('cluster')['gene'].apply(list).to_dict()
+    return gene_dict
 
 def execute_task(func, params_dict):
     """

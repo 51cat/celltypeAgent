@@ -1,7 +1,7 @@
 from typing import Dict, Any
 from openai import OpenAI
-from p8.llm.base import BaseLLM
-from p8.llm.message import Message
+from celltypeAgent.llm.base import BaseLLM
+from celltypeAgent.llm.message import Message
 
 BASE_URL = 'https://api.n1n.ai/v1'
 

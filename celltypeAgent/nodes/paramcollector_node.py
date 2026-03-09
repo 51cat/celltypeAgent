@@ -1,8 +1,8 @@
 
-from p8.prompt.prompt import PARAM_COLLECTOR_PROMPT
-from p8.llm.n1n import N1N_LLM
-from p8.llm.message import Message
-from p8.tools.utils import extract_and_validate_json, \
+from celltypeAgent.prompt.prompt import PARAM_COLLECTOR_PROMPT
+from celltypeAgent.llm.n1n import N1N_LLM
+from celltypeAgent.llm.message import Message
+from celltypeAgent.tools.utils import extract_and_validate_json, \
     get_table_context, \
         parse_response,\
             execute_task,extract_top_genes
@@ -50,9 +50,10 @@ def main():
         base_url = "https://api.n1n.ai/v1"
     )
 
-    pcnode = ParamCollectorNode(llm, "/home/zhliu/test/p8/deg_sig_fc_up_padj(2).csv")
+    pcnode = ParamCollectorNode(llm, "/Users/kochan/Desktop/code/celltypeAgent/deg_sig_fc_up_padj.csv")
     pcnode.prep()
-    a = pcnode.run()
+    a = pcnode.run()[1]
+    
 
     print(a)
 

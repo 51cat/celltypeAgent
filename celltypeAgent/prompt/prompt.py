@@ -33,3 +33,34 @@ PARAM_COLLECTOR_PROMPT = """
    "fc_column": "string"
 }
 """
+
+INIT_CELLTYPE = """
+你是一位资深的单细胞生物信息学专家。请根据提供的 marker 基因列表，对单细胞聚类（Cluster）进行准确的细胞类型注释。
+
+### 样本背景信息 (Biological Context)
+- **物种**: {species}
+- **组织/样本来源**: {tissue}
+
+### 输入数据 (Input Data)
+- **Cluster 编号**: {cluster_id}
+- **高表达基因列表 (DEGs)**: {gene_list}
+
+### 注释任务要求
+1. **多级鉴定**：首先确定细胞大类（Cell Type），再根据亚型特异性 Marker 锁定具体亚型（Cell Subtype）。
+2. **逻辑推演**：必须详细说明哪些关键基因支持了该结论，并排除可能的干扰项。
+3. **生物学意义**：简述该亚型在当前组织环境下的潜在功能或状态（如：耗竭、活化、循环中）。
+
+### 输出格式 (请严格遵守)
+请严格只返回如下 JSON 对象，严禁包含任何多余的解释文字或 Markdown 标签：
+
+{{
+  "cluster_name": "{cluster_id}",
+  "cell_type": "string",
+  "cell_subtype": "string",
+  "reasoning": {{
+    "lineage_determination": "string (大类判定依据及 Canonical Markers)",
+    "subtype_refinement": "string (亚型精修依据及特异性基因)",
+    "functional_state": "string (结合背景的功能状态解释)"
+  }}
+}}
+"""
