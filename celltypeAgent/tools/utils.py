@@ -3,24 +3,6 @@ import json
 import pandas as pd
 
 
-def extract_top_genes(df, p_type_column, cluster_column, gene_column, ntop, fc_column):
-    """
-    专门针对 Seurat 风格结果设计的提取函数
-    """
-
-    if isinstance(df, str):
-        df = pd.read_csv(df)
-    
-    df_filtered = df[df[p_type_column] < 0.05].copy()
-    top_genes = (
-        df_filtered.groupby(cluster_column, group_keys=True)
-        .apply(lambda x: x.nlargest(ntop, fc_column))
-    ).reset_index()
-    print(top_genes)
-    result = top_genes[[cluster_column, gene_column]]#, fc_column, p_type_column]]
-    gene_dict = result.groupby('cluster')['gene'].apply(list).to_dict()
-    return gene_dict
-
 def execute_task(func, params_dict):
     """
     执行传入的函数并返回执行状态。
