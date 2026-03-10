@@ -47,22 +47,3 @@ class ParamCollectorNode:
             collect_parms, results
         )
         return res
-
-def main():
-
-    llm = N1N_LLM(
-        api_key = 'sk-VW019xQdJlI0EJKpESIj8UcUYWTMyBop78hsJQ2W5P8ppe3D',
-        model_name = 'claude-sonnet-4-6',
-        base_url = "https://api.n1n.ai/v1"
-    )
-
-    pcnode = ParamCollectorNode(llm, '/home/zhliu/test/p11/celltypeAgent/deg_all.csv')
-    pcnode.prep()
-    a = pcnode.run()[1]
-    
-
-    print(a)
-
-if __name__ == '__main__':
-    main()
-

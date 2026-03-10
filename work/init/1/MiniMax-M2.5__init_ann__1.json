@@ -1,0 +1,15 @@
+{
+    "cluster_name": "1",
+    "cell_type": "Doublet",
+    "cell_subtype": "Mixed lineage",
+    "reasoning": {
+        "lineage_determination": "该cluster的marker基因呈现典型的多谱系特征。KRT1和NEFL是典型的上皮细胞/神经元marker，HLF主要在淋巴造血组织表达，GATA3-AS1关联T细胞谱系，TPO是甲状腺滤泡细胞特异基因，ZP1主要在卵巢表达。这种多谱系marker共表达无法用单一细胞类型解释。",
+        "subtype_refinement": "该cluster高表达基因分属至少3个不同细胞谱系：上皮细胞谱系（KRT1）、神经细胞谱系（NEFL）、造血淋巴细胞谱系（HLF/GATA3-AS1/IL17RB）以及内分泌细胞谱系（TPO）。此外，ZP1和ADAM23分别指向生殖系统和神经系统。这种复杂的marker组合强烈提示存在双细胞或多细胞doublet。",
+        "functional_state": "从功能角度看，这些marker基因来自完全不同的细胞类型，缺乏统一的细胞功能特征。考虑到样本来源为Human blood tissue，在正常外周血中不应存在KRT1（角蛋白）、NEFL（神经丝）等组织特异性高表达基因。因此判定为技术性doublet，即两个或多个不同类型细胞在单细胞测序中被打包在一起。"
+    },
+    "model": "MiniMax-M2.5",
+    "spec": "Human",
+    "tissue": "blood",
+    "genes": "SNHG18,RP11-379F12.3,KRT1,HLF,GATA3-AS1,TPO,ADAM23,IL17RB,ZP1,NEFL",
+    "language": "中文"
+}

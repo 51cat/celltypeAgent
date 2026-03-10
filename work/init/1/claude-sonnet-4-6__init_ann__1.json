@@ -1,0 +1,15 @@
+{
+    "cluster_name": "1",
+    "cell_type": "Doublet",
+    "cell_subtype": "Mixed lineage",
+    "reasoning": {
+        "lineage_determination": "该cluster的marker基因来自多个截然不同的细胞谱系，无法归属于单一细胞类型。HLF是造血干细胞/祖细胞的经典标志基因；GATA3-AS1与GATA3相关，提示T细胞或肥大细胞谱系；IL17RB是II型固有淋巴细胞（ILC2）或嗜碱性粒细胞的标志；TPO（甲状腺过氧化物酶）通常在甲状腺上皮细胞高表达；KRT1是角质形成细胞的角蛋白标志；NEFL是神经元特异性神经丝轻链蛋白；ZP1是卵母细胞特异性蛋白。这些基因跨越了造血、上皮、神经、生殖等多个完全不同的谱系，在血液样本中不可能合理地由单一细胞类型解释。",
+        "subtype_refinement": "基因组合涵盖：造血干细胞相关（HLF）、T/ILC相关（GATA3-AS1、IL17RB）、上皮/角质形成细胞相关（KRT1）、甲状腺细胞相关（TPO）、神经细胞相关（NEFL）、生殖细胞相关（ZP1），以及长链非编码RNA（SNHG18、RP11-379F12.3）。如此分散且跨系统的marker组合强烈提示该cluster为多种细胞类型的doublet或multiplet混合，而非真实存在的单一细胞群体。",
+        "functional_state": "由于marker基因来自多个生物学上相互独立的细胞谱系，该cluster最可能代表测序过程中产生的doublet（双联体），即两个或多个不同类型细胞被封装在同一液滴中共同测序的结果。在人血液样本中，同时表达神经元、卵母细胞、甲状腺上皮和造血细胞marker的单一细胞在生物学上不具合理性，建议在下游分析中将该cluster作为doublet过滤去除。"
+    },
+    "model": "claude-sonnet-4-6",
+    "spec": "Human",
+    "tissue": "blood",
+    "genes": "SNHG18,RP11-379F12.3,KRT1,HLF,GATA3-AS1,TPO,ADAM23,IL17RB,ZP1,NEFL",
+    "language": "中文"
+}

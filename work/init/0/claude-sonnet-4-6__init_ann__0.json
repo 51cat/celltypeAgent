@@ -1,0 +1,15 @@
+{
+    "cluster_name": "0",
+    "cell_type": "T cell",
+    "cell_subtype": "Effector Memory CD8+ T cell (Temra/NK-like)",
+    "reasoning": {
+        "lineage_determination": "TRAJ61和TRAV23DV6是T细胞受体（TCR）α链的基因片段，明确指示该cluster属于T细胞谱系。TCR基因的重排和表达是T细胞的经典标志。",
+        "subtype_refinement": "ZNF683（又称HOBIT）是组织驻留记忆T细胞和效应记忆CD8+ T细胞（尤其是Temra亚群）的特异性转录因子；GZMH（颗粒酶H）是细胞毒性CD8+ T细胞的效应分子；B3GAT1（CD57）是终末分化效应记忆CD8+ T细胞（Temra）及NK样T细胞的表面标志，提示高度分化状态；PROK2（prokineticin 2）在NK/T细胞中有表达并与细胞毒功能相关。综合以上，该cluster高度提示为终末分化效应记忆CD8+ T细胞（Temra）或具有NK样特征的细胞毒性T细胞亚群。",
+        "functional_state": "该cluster表达细胞毒性相关基因（GZMH）、终末分化标志（B3GAT1/CD57）以及组织驻留/效应转录因子（ZNF683），提示细胞处于高度分化的效应状态，具有强细胞毒活性，增殖潜能较低，是外周血中典型的抗原经历性终末效应T细胞功能状态。"
+    },
+    "model": "claude-sonnet-4-6",
+    "spec": "Human",
+    "tissue": "blood",
+    "genes": "TRAJ61,CTB-91J4.1,ZNF683,TRAV23DV6,LINC00384,PROK2,B3GAT1,GZMH,RP11-9M16.2,RP11-305L7.3",
+    "language": "中文"
+}

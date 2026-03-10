@@ -1,0 +1,21 @@
+{
+    "cluster_name": "0",
+    "cell_type": "Cytotoxic T lymphocytes (CTLs)",
+    "cell_subtype": "CD8+ Effector/Memory T cells",
+    "reasoning": {
+        "lineage_determination": "该cluster高表达多个T细胞受体(TCR)相关基因：TRAJ61、TRAV23DV6属于T细胞受体α链的J区和V区基因，明确指向T细胞谱系。同时表达细胞毒性相关基因GZMH(颗粒酶H)和B3GAT1(CD57)，进一步确认为细胞毒性T淋巴细胞。",
+        "subtype_refinement": "结合ZNF683(CD8+ T细胞特异性转录因子)和GZMH(细胞毒性效应分子)的表达，该cluster很可能代表CD8+效应/记忆T细胞。B3GAT1/CD57的表达提示这些细胞可能处于终末分化状态，是具有细胞毒性的效应T细胞。",
+        "functional_state": "该cluster表达典型的细胞毒性T细胞功能标记物(GZMH)，提示这些细胞具有细胞杀伤功能。结合血液组织背景，这些细胞可能是针对病毒感染或肿瘤的效应CD8+ T细胞，处于活跃的细胞毒性状态。"
+    },
+    "model": "MiniMax-M2.5",
+    "spec": "Human",
+    "tissue": "blood",
+    "genes": "TRAJ61,CTB-91J4.1,ZNF683,TRAV23DV6,LINC00384,PROK2,B3GAT1,GZMH,RP11-9M16.2,RP11-305L7.3",
+    "language": "中文",
+    "audit": {
+        "is_gene_faithful": true,
+        "is_biologically_valid": true,
+        "reliability_score": 82,
+        "audit_reasoning": "模型使用的证据均来自Marker Gene List，未出现Gene Hallucination。TRAJ61和TRAV23DV6明确指向T细胞谱系（TCRα链基因），GZMH作为细胞毒性颗粒酶强烈支持细胞毒性T细胞注释，B3GAT1（CD57）提示终末分化效应T细胞特征，ZNF683已有研究报道在组织驻留及CD8+ T细胞中富集。上述基因组合在血液背景下支持CD8+效应/记忆CTL的注释，具有较高生物学合理性。唯一略弱之处是ZNF683更常与组织驻留记忆T细胞（Trm）相关，在循环血液中的特异性稍有争议，但整体注释结论仍属可靠。"
+    }
+}

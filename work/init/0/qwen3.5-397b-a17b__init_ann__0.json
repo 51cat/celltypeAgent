@@ -1,0 +1,15 @@
+{
+    "cluster_name": "0",
+    "cell_type": "CD8+ T 细胞",
+    "cell_subtype": "细胞毒性效应记忆 T 细胞",
+    "reasoning": {
+        "lineage_determination": "DEGs 中包含 TRAJ61 和 TRAV23DV6，这两个是 T 细胞受体（TCR）alpha 链的关键组分，明确指示该群细胞属于 T 细胞谱系。",
+        "subtype_refinement": "GZMH（颗粒酶 H）和 ZNF683 是细胞毒性淋巴细胞的特征基因。在 T 细胞谱系中，这些基因的组合表达强烈提示 CD8+ 细胞毒性亚型。B3GAT1 常与效应记忆表型相关，支持该亚型推断。",
+        "functional_state": "GZMH 的高表达表明细胞具有强烈的细胞毒性潜能。ZNF683 的表达提示细胞具有记忆性特征。基因表达谱主要富集于效应功能分子，表明细胞处于执行免疫杀伤功能的效应状态。"
+    },
+    "model": "qwen3.5-397b-a17b",
+    "spec": "Human",
+    "tissue": "blood",
+    "genes": "TRAJ61,CTB-91J4.1,ZNF683,TRAV23DV6,LINC00384,PROK2,B3GAT1,GZMH,RP11-9M16.2,RP11-305L7.3",
+    "language": "中文"
+}

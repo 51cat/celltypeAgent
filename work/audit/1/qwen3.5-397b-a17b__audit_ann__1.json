@@ -1,0 +1,21 @@
+{
+    "cluster_name": "1",
+    "cell_type": "Doublet",
+    "cell_subtype": "Mixed lineage",
+    "reasoning": {
+        "lineage_determination": "DEGs 中包含上皮细胞特异性标记 KRT1、神经元特异性标记 NEFL、生殖细胞特异性标记 ZP1，以及造血/免疫相关标记 HLF、GATA3-AS1 和 IL17RB，显示多个截然不同细胞谱系的特征共存。",
+        "subtype_refinement": "由于血液样本中单一细胞无法同时表达上皮、神经及生殖细胞特异性基因，无法鉴定为具体亚型，符合不同细胞粘连形成的 Mixed lineage 特征。",
+        "functional_state": "标记基因组合违背血液组织的生物学合理性，表明该 Cluster 代表技术 artifact 而非真实的细胞功能状态。"
+    },
+    "model": "qwen3.5-397b-a17b",
+    "spec": "Human",
+    "tissue": "blood",
+    "genes": "SNHG18,RP11-379F12.3,KRT1,HLF,GATA3-AS1,TPO,ADAM23,IL17RB,ZP1,NEFL",
+    "language": "中文",
+    "audit": {
+        "is_gene_faithful": true,
+        "is_biologically_valid": true,
+        "reliability_score": 82,
+        "audit_reasoning": "模型注释完全基于 Marker Gene List 中的基因，未使用列表外基因作为主要证据，无 gene hallucination。Marker Gene List 中确实包含来自截然不同谱系的基因：KRT1 为上皮细胞角蛋白标记，NEFL 为神经元特异性中间丝蛋白，ZP1 为卵母细胞特异性透明带蛋白，而 HLF 和 GATA3-AS1 属于造血/免疫相关标记，IL17RB 与T辅助细胞相关。在血液组织背景下，单一真实细胞不可能同时高表达上皮、神经和生殖细胞特异性基因，这种跨谱系混合信号高度提示为 Doublet 技术伪影。SNHG18、RP11-379F12.3 等 lncRNA 及 TPO、ADAM23 的存在进一步支持该 cluster 代表混合细胞粘连而非真实细胞类型。综合来看，Doublet/Mixed lineage 的注释在生物学上合理且有充分的 marker 支持。"
+    }
+}

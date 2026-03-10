@@ -1,0 +1,15 @@
+{
+    "cluster_name": "2",
+    "cell_type": "中性粒细胞",
+    "cell_subtype": "炎症性中性粒细胞",
+    "reasoning": {
+        "lineage_determination": "高表达 S100A8, S100A12, CLEC4E 等基因，明确指向髓系细胞谱系。",
+        "subtype_refinement": "CXCL1 和 S100A12 是中性粒细胞的强特异性标记，相较于单核细胞典型标记，本 cluster 更符合中性粒细胞特征。",
+        "functional_state": "高表达趋化因子 CXCL1, CCL2 及钙结合蛋白 S100A8/A12，提示细胞处于炎症激活状态，参与免疫招募和炎症反应。"
+    },
+    "model": "qwen3.5-397b-a17b",
+    "spec": "Human",
+    "tissue": "blood",
+    "genes": "CXCL1,CCL2,ZNF697,CLEC4E,SERPINB2,CTB-61M7.2,S100A12,S100A8,ALDH1A1,RP11-362F19.3",
+    "language": "中文"
+}

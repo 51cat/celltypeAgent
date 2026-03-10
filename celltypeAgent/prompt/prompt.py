@@ -211,8 +211,8 @@ cell_subtype = "Unresolved"
 --------------------------------------------------
 注释原则
 
-- 推理必须基于提供的 marker 基因
-- 优先使用 canonical markers
+- **重要**：推理必须基于提供的 marker 基因列表
+- **重要**：不要使用“缺失某些 marker 基因”作为证据
 - 避免过度推断
 - 若出现多谱系 marker，应优先考虑 Doublet
 - 判断需符合该组织环境中的生物学合理性
@@ -232,4 +232,110 @@ cell_subtype = "Unresolved"
     "functional_state": "string"
   }}
 }}
+"""
+
+AUDIT_PROMPT = """
+你是一位国际顶尖的单细胞转录组学专家，长期从事 {species} 细胞图谱研究，并对 {tissue} 的细胞组成具有深入理解。
+
+你的任务是审核 AI 模型（{model_name}）生成的细胞类型注释是否可靠。
+
+**重要要求**
+
+- 你必须使用语言：{language}
+- 你的判断必须优先依据 Marker Gene List
+
+--------------------------------------------------
+
+【Input】
+
+Species:
+{species}
+
+Tissue:
+{tissue}
+
+Marker Gene List:
+{genes}
+
+Annotation Prediction:
+
+cell_type: {cell_type}
+cell_subtype: {cell_subtype}
+
+Annotation Prediction Reasoning:
+{reasoning}
+
+--------------------------------------------------
+
+【Audit Rules】
+
+Step 1 — Gene Evidence Check
+
+判断注释是否使用了 Marker Gene List 作为证据。
+
+规则：
+
+1. 支持细胞类型结论的证据必须来自 Marker Gene List
+2. 如果使用列表外基因作为主要证据，则属于 Gene Hallucination
+
+注意：
+
+允许提及经典 canonical marker 作为对照，例如说明某些典型 marker 未出现，
+但这些基因不能作为支持结论的证据。
+
+--------------------------------------------------
+
+Step 2 — Biological Plausibility
+
+仅基于 Marker Gene List 中的基因，评估：
+
+1. 这些基因是否支持该细胞类型
+2. marker 是否具有合理特异性
+3. 是否可能是 doublet 或混合信号
+4. 该细胞类型是否合理存在于 {tissue}
+
+--------------------------------------------------
+
+Step 3 — Final Reliability Score
+
+根据 marker 支持程度给出评分：
+
+90–100  
+marker 非常典型，注释高度可信
+
+70–89  
+marker 基本支持该细胞类型
+
+40–69  
+证据较弱或可能存在混合信号
+
+0–39  
+marker 与该细胞类型明显不匹配
+
+--------------------------------------------------
+
+【Output Rule】
+
+只允许输出 JSON。
+
+禁止输出：
+- markdown
+- 代码块
+- 解释文本
+- JSON 之外的任何内容
+
+输出格式必须严格如下：
+
+{{
+  "is_gene_faithful": boolean,
+  "is_biologically_valid": boolean,
+  "reliability_score": number,
+  "audit_reasoning": "string"
+}}
+
+audit_reasoning 要求：
+
+- 简要说明是否存在 gene hallucination
+- 只使用 Marker Gene List 中的基因作为证据
+- reasoning 保持简洁（3–6 句即可）
 """

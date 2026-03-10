@@ -1,0 +1,15 @@
+{
+    "cluster_name": "2",
+    "cell_type": "Myeloid cells",
+    "cell_subtype": "Inflammatory monocytes / neutrophil-like myeloid cells",
+    "reasoning": {
+        "lineage_determination": "该群细胞高表达 S100A8、S100A12、CLEC4E、CCL2、CXCL1、SERPINB2，整体特征明确指向髓系细胞谱系。其中 S100A8 和 S100A12 是外周血炎症性髓系细胞常见标志，CLEC4E 为先天免疫受体，CCL2 与 CXCL1 反映髓系细胞的炎症趋化特征，因此可首先判定为髓系细胞。",
+        "subtype_refinement": "在髓系细胞内部，该 cluster 更接近炎症性单核细胞/中性粒细胞样髓系细胞。支持依据包括：S100A8、S100A12 为强炎症型髓系标志；CCL2、CXCL1 提示活化的促炎趋化因子分泌状态；CLEC4E 和 SERPINB2 常见于被炎症刺激激活的单核-巨噬细胞系统。由于该基因集同时具有明显的粒细胞炎症特征和单核细胞趋化/受体特征，更稳妥的注释应为 inflammatory monocytes / neutrophil-like myeloid cells，而非过度限定为单一终末亚群。",
+        "functional_state": "该群细胞处于明显的促炎激活状态。CXCL1、CCL2 表明其具有募集其他免疫细胞的能力，S100A8/S100A12 反映急性炎症和先天免疫激活，CLEC4E 指示病原体或损伤相关信号感知，SERPINB2 进一步支持炎症应答相关功能。在人外周血背景下，这类细胞很可能代表循环中的活化炎症性髓系细胞。"
+    },
+    "model": "gpt-5.4",
+    "spec": "Human",
+    "tissue": "blood",
+    "genes": "CXCL1,CCL2,ZNF697,CLEC4E,SERPINB2,CTB-61M7.2,S100A12,S100A8,ALDH1A1,RP11-362F19.3",
+    "language": "中文"
+}
