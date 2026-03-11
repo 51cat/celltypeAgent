@@ -116,6 +116,7 @@ celltypeAgent/
 - ⌛️ Web界面
 - ⌛️ 结果可视化
 - ⌛️ 批量处理优化
+- ⌛️ 细胞类型注释节点agent扩展功能：KEGG/NCBI API集成（获取基因功能描述）
 
 ## 依赖
 
