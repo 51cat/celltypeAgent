@@ -1,127 +1,115 @@
-# AGENTS.md - Coding Guidelines for CelltypeAgent
+# AGENTS.md
 
-This document provides coding guidelines for AI agents working on the CelltypeAgent codebase.
+Guide for AI coding agents working in the CelltypeAgent repository.
 
 ## Project Overview
 
-CelltypeAgent is a multi-agent system for automatic cell type annotation in single-cell RNA sequencing data. It uses multiple LLM models (GPT, Claude, MiniMax, Qwen) to annotate cell types collaboratively without relying on frameworks like LangChain.
+CelltypeAgent is a multi-agent cell type annotation system for single-cell RNA sequencing data. It uses multiple LLM models in parallel to annotate cell types and reaches consensus through expert review.
 
-## Build/Lint/Test Commands
+**Tech Stack**: Python 3.10+, OpenAI SDK, Click (CLI), Rich (console), pandas
+
+## Build & Installation
 
 ```bash
-# Install the package in development mode
+# Install in editable mode
 pip install -e .
 
-# Run the main agent
-python -m celltypeAgent.agent2
-
-# No formal test suite exists. To test manually:
-python -c "from celltypeAgent import load_json, write_json; print('Import OK')"
-
-# No linting/type checking configured. If adding, consider:
-# pip install ruff mypy
-# ruff check celltypeAgent/
-# mypy celltypeAgent/
+# Run the CLI
+celltype-agent annotate <input_file> -o <output_dir>
+celltype-agent version
 ```
 
-## Project Structure
+## Testing
 
+No test framework is currently configured. When tests are added:
+
+```bash
+# Run all tests
+pytest
+
+# Run a single test file
+pytest tests/test_module.py
+
+# Run a single test function
+pytest tests/test_module.py::test_function_name -v
+
+# Run with coverage
+pytest --cov=celltypeAgent
 ```
-celltypeAgent/
-├── celltypeAgent/           # Main package
-│   ├── __init__.py          # Package init, JSON utilities, config loader
-│   ├── agent2.py            # Main agent orchestration
-│   ├── config.json          # API credentials (do not commit secrets)
-│   ├── llm/                 # LLM interface implementations
-│   │   ├── base.py          # Abstract base class for LLMs
-│   │   ├── n1n.py           # N1N API implementation
-│   │   ├── message.py       # Message history management
-│   │   └── tool.py          # Tool documentation extraction
-│   ├── nodes/               # Workflow nodes
-│   │   ├── paramcollector_node.py   # Parameter collection
-│   │   ├── anno_cluster_node.py     # Cell type annotation
-│   │   ├── audit_ann_node.py        # Annotation auditing
-│   │   └── consensus_node.py        # Multi-model consensus
-│   ├── state/               # State management
-│   │   └── state.py         # Dataclasses for state objects
-│   ├── prompt/              # Prompt templates
-│   │   └── prompt.py        # All prompt strings
-│   └── tools/               # Utility functions
-│       ├── utils.py         # General utilities
-│       └── agent_tools.py   # Agent-specific tools
-├── example_data/            # Test data files
-├── work/                    # Output directory
-└── setup.py                 # Package setup
+
+## Linting & Type Checking
+
+No linter is currently configured. Recommended setup:
+
+```bash
+# Install dev dependencies
+pip install ruff mypy
+
+# Run ruff linter
+ruff check .
+
+# Run ruff formatter
+ruff format .
+
+# Run type checker
+mypy celltypeAgent/
 ```
 
 ## Code Style Guidelines
 
 ### Imports
 
-Order imports in three groups, separated by blank lines:
+Group imports in this order, separated by blank lines:
 
-1. Standard library imports
-2. Third-party imports
-3. Local package imports
+1. Standard library (alphabetical)
+2. Third-party packages (alphabetical)
+3. Local imports (alphabetical)
 
 ```python
-import os
 import json
-from typing import Dict, Any, Optional
+import os
+from typing import Dict, List, Optional
 
-import pandas as pd
 from openai import OpenAI
+from rich.console import Console
 
 from celltypeAgent.llm.base import BaseLLM
-from celltypeAgent.state.state import MetaData
+from celltypeAgent.tools.logger import log_error, log_success
 ```
+
+### Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Classes | PascalCase | `CelltypeAnnoNode`, `N1N_LLM` |
+| Functions/Methods | snake_case | `collect_parms`, `get_celltype` |
+| Variables | snake_case | `cluster_id`, `model_name` |
+| Constants | UPPER_SNAKE_CASE | `MAX_RETRIES`, `INIT_CELLTYPE` |
+| Private methods | _leading_underscore | `_initialize_client` |
+| Module-level dunder | __dunder__ | `__init__.py` |
 
 ### Type Hints
 
-- Use type hints for function parameters and return types
-- Use `Optional[T]` for optional parameters
-- Use `dict`, `list`, `str` (lowercase) for simple types
-- Use `Dict[str, Any]`, `List[str]` for complex types from `typing`
+Use type hints for function signatures. Use `Optional` for optional parameters.
 
 ```python
 def invoke(self, message_input: Message, **kwargs) -> str:
     ...
 
-def __init__(self, api_key: str, model_name: str | None = None):
+def __init__(self, api_key: str, model_name: Optional[str] = None):
     ...
 ```
 
-### Naming Conventions
-
-- **Classes**: PascalCase (e.g., `CelltypeAnnoNode`, `MetaData`)
-- **Functions/Methods**: snake_case (e.g., `get_celltype`, `extract_and_validate_json`)
-- **Constants**: UPPER_SNAKE_CASE (e.g., `PARM_COLLECT_MODEL`, `MAX_REFLECT_TIMES`)
-- **Private methods**: Prefix with underscore (e.g., `_initialize_metadata_state`)
-- **Properties**: Use `@property` decorator for computed attributes
-
-### Class Structure
-
-Follow this pattern for node classes:
+For Python 3.10+, prefer union syntax:
 
 ```python
-class ExampleNode:
-    def __init__(self, LLM, metadata_state: MetaData, state: SingleCluster) -> None:
-        self.llm = LLM
-        self.metadata_state = metadata_state
-        self.state = state
-    
-    def prep(self):
-        """Prepare prompts and inputs before running."""
-        ...
-    
-    def run(self) -> dict:
-        """Execute the main logic."""
-        ...
+def validate(self, data: dict | None) -> bool:
+    ...
 ```
 
-### State Classes
+### Dataclasses
 
-Use `@dataclass` for state objects:
+Use `@dataclass` for state management classes:
 
 ```python
 from dataclasses import dataclass, field
@@ -134,64 +122,136 @@ class SingleCluster:
     ann_results: dict = field(default_factory=dict)
 ```
 
-### Error Handling
+### Abstract Base Classes
 
-- Use try-except for operations that may fail (file I/O, API calls, JSON parsing)
-- Return tuples of `(success: bool, result: Any)` for task execution
-- Raise `Exception` with descriptive messages for unrecoverable errors
+Use `ABC` and `@abstractmethod` for interfaces:
 
 ```python
-try:
-    result = func(**params_dict)
-    return True, result
-except Exception as e:
-    return False, e
+from abc import ABC, abstractmethod
+
+class BaseLLM(ABC):
+    @abstractmethod
+    def invoke(self, system_prompt: str, user_prompt: str, **kwargs) -> str:
+        pass
 ```
 
-### Logging and Decorators
+### Error Handling
 
-Use the `@add_log` decorator for methods that need timing/logging:
+Use specific exception types. Log errors with the logger module:
+
+```python
+from celltypeAgent.tools.logger import log_error
+
+try:
+    result = func(**params)
+except Exception as e:
+    log_error(f"执行失败: {str(e)}")
+    raise
+```
+
+### Logging & Output
+
+Use the `logger.py` module for console output. Do NOT use `print()` directly.
+
+```python
+from celltypeAgent.tools.logger import (
+    log_info, log_warning, log_error, log_success
+)
+
+log_info("Processing cluster...")
+log_warning("Low reliability score")
+log_error("API call failed")
+log_success("Annotation complete")
+```
+
+Use the `@add_log` decorator for automatic function timing:
 
 ```python
 from celltypeAgent.tools.utils import add_log
 
 @add_log
-def _initialize_metadata_state(self):
+def process_cluster(self, cluster_id: int):
     ...
 ```
 
-### JSON Handling
+### CLI Commands
 
-- Use `json.dumps()` with `ensure_ascii=False` for Chinese text
-- Use `extract_and_validate_json()` to parse LLM responses
-- Use `load_json()` and `write_json()` from `__init__.py`
-
-### Prompt Templates
-
-Store all prompts in `celltypeAgent/prompt/prompt.py` as module-level constants:
+Use Click decorators for CLI:
 
 ```python
-PROMPT_NAME = """
-Template content with {placeholder}
-"""
+import click
+
+@click.group()
+def cli():
+    """Description"""
+    pass
+
+@cli.command()
+@click.argument('input_file', type=click.Path(exists=True))
+@click.option('-o', '--output', required=True, help='Output directory')
+def annotate(input_file, output):
+    """Command description"""
+    ...
 ```
 
-### LLM Integration
+### Project Structure
 
-- Extend `BaseLLM` for new LLM providers
-- Implement `invoke()` and `invoke_stream()` methods
-- Use the `Message` class for conversation history management
+```
+celltypeAgent/
+├── llm/           # LLM provider implementations (inherit from BaseLLM)
+├── nodes/         # Workflow nodes (each node is a processing step)
+├── state/         # Dataclass state management
+├── tools/         # Utility functions and tools
+├── prompt/        # Prompt templates (uppercase constants)
+├── cli.py         # CLI entry point
+└── workflow.py    # Main workflow orchestration
+```
 
-## Dependencies
+### Adding a New LLM Provider
 
-- `openai` - OpenAI API client
-- `pandas` - Data manipulation
-- `requests` - HTTP requests
+1. Create new file in `llm/` directory
+2. Inherit from `BaseLLM`
+3. Implement `invoke()` and `get_default_model()`
+4. Add configuration to `config.json`
 
-## Important Notes
+### JSON Handling
 
-1. **Do not commit API keys** in `config.json` - use environment variables for production
-2. **Chinese language support** is required - always use `ensure_ascii=False` for JSON
-3. **No external frameworks** - keep implementations minimal and educational
-4. **Reflection pattern** - agents can reflect on results up to `MAX_REFLECT_TIMES`
-5. **Multi-model consensus** - final results combine multiple model predictions
+Use the helper functions from `__init__.py`:
+
+```python
+from celltypeAgent import load_json, write_json
+
+data = load_json('config.json')
+write_json(data, 'output.json')
+```
+
+Always use `ensure_ascii=False` for Chinese text support.
+
+### Prompts
+
+Store all prompts as uppercase module-level constants in `prompt/prompt.py`. Use `.format()` for variable substitution:
+
+```python
+INIT_CELLTYPE = """
+You are an expert...
+Species: {species}
+Tissue: {tissue}
+"""
+
+formatted = INIT_CELLTYPE.format(species="Human", tissue="Liver")
+```
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `workflow.py` | Main orchestration, entry point for annotation pipeline |
+| `cli.py` | Command-line interface definitions |
+| `llm/base.py` | Abstract base class for LLM implementations |
+| `state/state.py` | Dataclasses for state management |
+| `tools/logger.py` | Rich-based logging and console output |
+| `prompt/prompt.py` | All prompt templates |
+
+## Configuration
+
+API credentials are stored in `celltypeAgent/config.json`. Do NOT commit real API keys.
