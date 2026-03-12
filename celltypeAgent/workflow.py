@@ -12,18 +12,20 @@ from celltypeAgent.nodes.paramcollector_node import ParamCollectorNode
 from celltypeAgent.nodes.anno_cluster_node import CelltypeAnnoNode
 from celltypeAgent.nodes.audit_ann_node import CelltypeAnnAuditNode
 from celltypeAgent.nodes.consensus_node import CelltypeConsensusNode
+from celltypeAgent.nodes.report_node import CelltypeReportNode
 from celltypeAgent import get_llm_config_value
 
 
 
 PARM_COLLECT_MODEL = 'gpt-5.4'
-ANNOTATION_MODEL   =  ['gpt-5.4', 'claude-sonnet-4-6']
+REPORT_MODEL       = 'claude-sonnet-4-6'
+ANNOTATION_MODEL   =  ['gpt-5.4', 'claude-sonnet-4-6','qwen3.5-397b-a17b', 'grok-4.2', 'glm-5', 'deepseek-v3.2']
 AUDIT_MODEL        = 'claude-sonnet-4-6'
 CONSENSUS_MODEL     = 'claude-sonnet-4-6'
 MAX_REFLECT_TIMES   = 5
-RELIABILITY_THRESHOLD = 80
+RELIABILITY_THRESHOLD = 70
 
-class CelltypeAgent:
+class CelltypeWorkflow:
     def __init__(self, marker_table, outdir, provider= 'n1n'):
         self.llm_config_dict = get_llm_config_value(provider)
         self.marker_table = marker_table
@@ -34,12 +36,6 @@ class CelltypeAgent:
         self._initialize_client()
         self._initialize_nodes()
 
-        if not os.path.exists(self.metadata_state.get_metadata_val('outdir_ann')):
-            os.makedirs(self.metadata_state.get_metadata_val('outdir_ann'))
-        
-        if not os.path.exists(self.metadata_state.get_metadata_val('outdir_audit')):
-            os.makedirs(self.metadata_state.get_metadata_val('outdir_audit'))
-
     @add_log
     def _initialize_metadata_state(self):
         self.metadata_state.update_matadata('marker_table', self.marker_table)
@@ -49,9 +45,9 @@ class CelltypeAgent:
         self.metadata_state.update_matadata('annotation_model', ANNOTATION_MODEL)
         self.metadata_state.update_matadata('audit_model', AUDIT_MODEL)
         self.metadata_state.update_matadata('consensus_model', CONSENSUS_MODEL)
+        self.metadata_state.update_matadata('report_model', REPORT_MODEL)
 
-        self.metadata_state.update_matadata('outdir_ann', f"{self.outdir}/init/")
-        self.metadata_state.update_matadata('outdir_audit', f"{self.outdir}/audit/")
+        self.metadata_state.update_matadata('outdir', f"{self.outdir}/")
 
         
     @add_log
@@ -77,12 +73,16 @@ class CelltypeAgent:
         self.consensus_client = N1N_LLM(api_key = self.metadata_state.get_metadata_val('api'),
             model_name = self.metadata_state.get_metadata_val('consensus_model'),
             base_url = self.metadata_state.get_metadata_val('base_url'))
+        
+        self.report_client = N1N_LLM(api_key = self.metadata_state.get_metadata_val('api'),
+            model_name = self.metadata_state.get_metadata_val('report_model'),
+            base_url = self.metadata_state.get_metadata_val('base_url'))
 
     @add_log
     def _initialize_nodes(self):
         self.pnode = ParamCollectorNode(self.parm_collect_client, self.metadata_state)
     
-    
+    @add_log
     def _ann_single_cluster(self, cluster_id = 0):
         
         # 初始化
@@ -112,7 +112,7 @@ class CelltypeAgent:
             while score < RELIABILITY_THRESHOLD:
                 reflect_times += 1
 
-                print(f"模型 {model_name} 的注释结果被评为不可靠，正在进行第{reflect_times}次反思修正...")
+                self._ann_single_cluster.logger.info(f"模型 {model_name} 的注释结果被评为不可靠，正在进行第{reflect_times}次反思修正...")
                 
                 res_ann = cnode.reflect_ann(res_ann)
                 cluster_state.update_ann_results(model_name, res_ann)
@@ -123,19 +123,49 @@ class CelltypeAgent:
                 score = res_audio['reliability_score']
 
                 if reflect_times >= MAX_REFLECT_TIMES:
-                    print(f"模型 {model_name} 的注释结果经过 {MAX_REFLECT_TIMES} 次反思修正后仍被评为不可靠，停止反思修正。本次注释标记为不可靠。")
+                    self._ann_single_cluster.logger.warning(f"模型 {model_name} 的注释结果经过 {MAX_REFLECT_TIMES} 次反思修正后仍被评为不可靠，停止反思修正。本次注释标记为不可靠。")
                     cell_type = cluster_state.get_celltype(model_name)
                     cell_subtype = cluster_state.get_cell_subtype(model_name)
 
                     cluster_state.update_cell_subtype(model_name, f'(Unreliable)_{cell_type}')
                     cluster_state.update_cell_subtype(model_name, f'(Unreliable)_{cell_subtype}')
                     break
+
+            self._ann_single_cluster.logger.info(f"模型 {model_name} 的注释结果已完成，可靠性评分为 {score}。")
+        
+        self._ann_single_cluster.logger.info(f"cluster: {cluster_id} {model_name} 的注释和审核流程已完成，开始进行共识检验...")
+        
         # 共识检验
         connode = CelltypeConsensusNode(self.consensus_client, self.metadata_state, cluster_state)
         connode.prep()
         res_con = connode.run()
-        print(res_con)
+        cluster_state.updata_consensus_results(res_con)
 
+        self._ann_single_cluster.logger.info(f"cluster: {cluster_id} 的共识检验已完成，开始生成报告...")
+
+        # 输出报告
+        rnode = CelltypeReportNode(self.report_client, cluster_state)
+        rnode.prep()
+        res_report = rnode.run()
+
+        self._ann_single_cluster.logger.info(f"cluster: {cluster_id} 的报告已生成，开始保存结果...")
+
+        # save resluts
+        outdir = self.metadata_state.get_metadata_val('outdir')
+        log_outdir = f"{outdir}/log/{cluster_id}/"
+        report_dir = f"{outdir}/report/"
+
+        if not os.path.exists(log_outdir):
+            os.makedirs(outdir, exist_ok=True)
+        
+        write_json(cluster_state.ann_to_dict(), f"{log_outdir}/ann_results.json")
+        write_json(cluster_state.audit_to_dict(), f"{log_outdir}/audit_results.json")
+        write_json(cluster_state.consensus_to_dict(), f"{log_outdir}/consensus_results.json")
+        write_json(MetaData.to_dict(self.metadata_state), f"{log_outdir}/metadata.json")
+
+        with open(f"{report_dir}/report_{cluster_id}.md", 'w', encoding='utf-8') as f:
+            f.write(res_report)
+        
                 
     @add_log
     def collect_parms(self):
@@ -150,19 +180,22 @@ class CelltypeAgent:
             self.metadata_state.update_matadata(k, v)
 
         self.cluster_gene_state = ClusterInfo(results['cluster'])
+    
+    def multi_cluster_annotation(self):
+        cluster_ids = self.cluster_gene_state.get_all_cluster()
+
+        with ThreadPoolExecutor(max_workers=min(len(cluster_ids), 4)) as executor:
+            executor.map(self._ann_single_cluster, cluster_ids)
+
+def main():
+
+    INPUT_DATA = f"{os.path.dirname(os.path.dirname(__file__))}/example_data/test.csv"
+
+    runner = CelltypeWorkflow(INPUT_DATA, 'work3/')
+
+    runner.collect_parms()
+    runner._ann_single_cluster(0)
 
 
-
-
-
-
-
-INPUT_DATA = f"{os.path.dirname(os.path.dirname(__file__))}/example_data/test.csv"
-
-runner = CelltypeAgent(INPUT_DATA, 'work2/')
-
-runner.collect_parms()
-runner._ann_single_cluster(0)
-runner._ann_single_cluster(1)
-runner._ann_single_cluster(2)
-runner._ann_single_cluster(30)
+if __name__ == "__main__":
+    main()

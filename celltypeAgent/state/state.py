@@ -40,6 +40,7 @@ class SingleCluster:
     cluster_genes: List[str] = field(default_factory=list)
     ann_results: dict = field(default_factory=dict)
     audit_results: dict = field(default_factory=dict)
+    consensus_results: dict = field(default_factory=dict)
     
     
     # 初次注释结果的操作方法
@@ -66,8 +67,14 @@ class SingleCluster:
     def update_audit_results(self, model_name, res):
         self.audit_results[model_name] = res
     
+    def updata_consensus_results(self, res):
+        self.consensus_results = res
+
     def ann_to_dict(self):
         return self.ann_results
     
     def audit_to_dict(self):
         return self.audit_results
+    
+    def consensus_to_dict(self):
+        return self.consensus_results

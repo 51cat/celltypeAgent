@@ -61,6 +61,23 @@ def extract_and_validate_json(text, required_keys=None):
         return None
 
 
+def clean_markdown_format(text):
+    """
+    去除字符串首尾的 ```markdown 和 ``` 标识符
+    """
+    text = text.strip()
+    # 处理开头的标记
+    if text.startswith("```markdown"):
+        text = text[11:].lstrip()
+    elif text.startswith("```"):
+        text = text[3:].lstrip()
+    
+    # 处理结尾的标记
+    if text.endswith("```"):
+        text = text[:-3].rstrip()
+    
+    return text
+
 def parse_response(response):
     if isinstance(response, dict):
         return response

@@ -1,4 +1,7 @@
 import pandas as pd
+import requests
+from typing import List, Dict
+
 
 def collect_parms(p_type_column, cluster_column, gene_column, ntop, fc_column, spec, tissue, df = None, language ='中文'):
     """
