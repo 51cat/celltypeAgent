@@ -89,3 +89,4 @@ weights/
 *.log
 config.yaml.local
 credentials.json
+work/
