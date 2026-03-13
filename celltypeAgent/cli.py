@@ -11,8 +11,35 @@ VERSION = "1.0.0"
 
 @click.group()
 def cli():
-    """✨ CelltypeAgent - 单细胞 RNA 序列数据细胞类型注释工具"""
+    """✨ ohmycelltype - 单细胞 RNA 序列数据细胞类型注释工具"""
     pass
+
+
+@cli.command()
+def init_config():
+    """初始化配置文件"""
+    console.print("[bold magenta]✨ 初始化配置文件...[/bold magenta]")
+    
+    from celltypeAgent.config import Config
+    config = Config()
+    config.init()
+    
+    log_success("配置文件已创建！请填入API Key等信息。")
+
+    console.print("[bold magenta]✨ 设置API Key...[/bold magenta]")
+
+    provider = click.prompt("请输入API提供商名称，不填则使用默认值", default="n1n")
+    api_key = click.prompt("请输入API Key", hide_input=False)
+    
+    
+    try:
+        config.set_api(provider, api_key)
+        log_success(f"{provider} API Key 已更新！")
+    except Exception as e:
+        log_error(f"设置API Key失败: {str(e)}")
+        raise click.Abort()
+    
+    
 
 
 @cli.command()
@@ -60,8 +87,21 @@ def annotate(input_file, output, provider):
 @cli.command()
 def version():
     """显示版本信息"""
-    console.print(f"[bold magenta]✨ CelltypeAgent[/bold magenta] version [cyan]{VERSION}[/cyan]")
+    console.print(f"[bold magenta]✨ ohmycelltype[/bold magenta] version [cyan]{VERSION}[/cyan]")
 
+@cli.command()
+def show():
+    """显示当前配置"""
+    from celltypeAgent.config import Config
+    config = Config()
+    
+    try:
+        console.print()
+        console.print("[bold magenta]✨ 当前配置...[/bold magenta]")
+        config.show()
+    except Exception as e:
+        log_error(f"显示配置失败: {str(e)}")
+        raise click.Abort()
 
 def main():
     cli()

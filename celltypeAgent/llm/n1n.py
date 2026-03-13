@@ -9,9 +9,6 @@ from celltypeAgent.tools.logger import (
 )
 
 
-MAX_RETRIES = 3
-
-
 class N1N_LLM(BaseLLM):
     def __init__(self, api_key: str, model_name: str | None = None, base_url = None):
 
@@ -26,7 +23,7 @@ class N1N_LLM(BaseLLM):
 
         print_stream_header(self.model_name)
 
-        for attempt in range(1, MAX_RETRIES + 1):
+        for attempt in range(1, self.max_retry + 1):
             try:
                 with wait_animation():
                     response = self.client.chat.completions.create(
@@ -46,18 +43,18 @@ class N1N_LLM(BaseLLM):
                     raise ValueError("无效响应")
                     
             except Exception as e:
-                if attempt < MAX_RETRIES:
+                if attempt < self.max_retry:
                     delay = 2 ** (attempt - 1)
                     log_retry(attempt + 1, delay, type(e).__name__)
                     time.sleep(delay)
                 else:
-                    log_error(f"重试 {MAX_RETRIES} 次后仍失败")
+                    log_error(f"重试 {self.max_retry} 次后仍失败")
                     print_stream_footer()
                     raise
     
     def invoke(self, message_input: Message, **kwargs):
 
-        for attempt in range(1, MAX_RETRIES + 1):
+        for attempt in range(1, self.max_retry + 1):
             try:
                 response = self.client.chat.completions.create(
                     model=self.model_name,
@@ -71,12 +68,12 @@ class N1N_LLM(BaseLLM):
                     raise ValueError("无效响应")
                     
             except Exception as e:
-                if attempt < MAX_RETRIES:
+                if attempt < self.max_retry:
                     delay = 2 ** (attempt - 1)
                     log_retry(attempt + 1, delay, type(e).__name__)
                     time.sleep(delay)
                 else:
-                    log_error(f"重试 {MAX_RETRIES} 次后仍失败")
+                    log_error(f"重试 {self.max_retry} 次后仍失败")
                     raise
 
 

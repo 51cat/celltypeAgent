@@ -14,6 +14,10 @@ class BaseLLM(ABC):
         self.api_key = api_key
         self.model_name = model_name
         self.base_url = base_url
+    
+
+    def set_max_retry(self, max_retry: int):
+        self.max_retry = max_retry
         
     @abstractmethod
     def invoke(self, system_prompt: str, user_prompt: str, **kwargs) -> str:

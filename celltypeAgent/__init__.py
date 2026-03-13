@@ -1,9 +1,7 @@
 import json
 import os
 
-import celltypeAgent
-
-CONFIG = f"{os.path.dirname(celltypeAgent.__file__)}/config.json"
+CONFIG = f"{os.environ.get('HOME')}/ohmycelltype.json"
 
 def get_llm_config_value(provider ,config = CONFIG):
     data = load_json(config)

@@ -12,7 +12,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'celltype-agent=celltypeAgent.cli:main',
+            'ohmycelltype=celltypeAgent.cli:main',
         ],
     },
 )

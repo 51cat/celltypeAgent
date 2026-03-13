@@ -20,15 +20,6 @@ from celltypeAgent.nodes.report_node import CelltypeReportNode
 from celltypeAgent import get_llm_config_value
 
 
-
-PARM_COLLECT_MODEL = 'gpt-5.4'
-REPORT_MODEL       = 'claude-sonnet-4-6'
-ANNOTATION_MODEL   =  ['gpt-5.4', 'claude-sonnet-4-6','qwen3.5-397b-a17b', 'grok-4.2', 'glm-5', 'deepseek-v3.2']
-AUDIT_MODEL        = 'claude-sonnet-4-6'
-CONSENSUS_MODEL     = 'claude-sonnet-4-6'
-MAX_REFLECT_TIMES   = 5
-RELIABILITY_THRESHOLD = 70
-
 class CelltypeWorkflow:
     def __init__(self, marker_table, outdir, provider= 'n1n'):
         self.llm_config_dict = get_llm_config_value(provider)
@@ -39,48 +30,75 @@ class CelltypeWorkflow:
         self._initialize_metadata_state()
         self._initialize_client()
         self._initialize_nodes()
+        
 
-    @add_log
     def _initialize_metadata_state(self):
         self.metadata_state.update_matadata('marker_table', self.marker_table)
         self.metadata_state.update_matadata('api', self.llm_config_dict['api'])
         self.metadata_state.update_matadata('base_url', self.llm_config_dict['base_url'])
-        self.metadata_state.update_matadata('parm_collect_model', PARM_COLLECT_MODEL)
-        self.metadata_state.update_matadata('annotation_model', ANNOTATION_MODEL)
-        self.metadata_state.update_matadata('audit_model', AUDIT_MODEL)
-        self.metadata_state.update_matadata('consensus_model', CONSENSUS_MODEL)
-        self.metadata_state.update_matadata('report_model', REPORT_MODEL)
+        self.metadata_state.update_matadata('parm_collect_model', self.llm_config_dict['parm_collect_model'])
+        self.metadata_state.update_matadata('annotation_model', self.llm_config_dict['annotation_model'])
+        self.metadata_state.update_matadata('audit_model', self.llm_config_dict['audit_model'])
+        self.metadata_state.update_matadata('consensus_model', self.llm_config_dict['consensus_model'])
+        self.metadata_state.update_matadata('report_model',  self.llm_config_dict['report_model'])
+        self.metadata_state.update_matadata('max_retry',  self.llm_config_dict['max_retry'])
+        self.metadata_state.update_matadata('max_reflect_times',  self.llm_config_dict['max_reflect_times'])
+        self.metadata_state.update_matadata('reliability_threshold',  self.llm_config_dict['reliability_threshold'])
 
         self.metadata_state.update_matadata('outdir', f"{self.outdir}/")
 
+        log_info("Metadata state initialized with configuration values", highlight=True)
+        log_info("Param collect model: " + self.metadata_state.get_metadata_val('parm_collect_model'))
+        log_info("Annotation models: " + ", ".join(self.metadata_state.get_metadata_val('annotation_model')))
+        log_info("Audit model: " + self.metadata_state.get_metadata_val('audit_model'))
+        log_info("Consensus model: " + self.metadata_state.get_metadata_val('consensus_model'))
+        log_info("Report model: " + self.metadata_state.get_metadata_val('report_model'))
+        log_info("Reliability threshold: " + str(self.metadata_state.get_metadata_val('reliability_threshold')))
+        log_info("Max retry: " + str(self.metadata_state.get_metadata_val('max_retry')))
+        log_info("Max reflect times: " + str(self.metadata_state.get_metadata_val('max_reflect_times')))
         
-    @add_log
+    
     def _initialize_client(self):
 
+        max_retry = self.metadata_state.get_metadata_val('max_retry')
+        api = self.metadata_state.get_metadata_val('api')
+        base_url = self.metadata_state.get_metadata_val('base_url')
+
         self.parm_collect_client = N1N_LLM(
-            api_key = self.metadata_state.get_metadata_val('api'),
+            api_key = api,
             model_name = self.metadata_state.get_metadata_val('parm_collect_model'),
             base_url = self.metadata_state.get_metadata_val('base_url')
         )
 
+        self.parm_collect_client.set_max_retry(max_retry)
+
         self.annotation_clients = [
-             N1N_LLM(api_key = self.metadata_state.get_metadata_val('api'), 
-                model_name = model_name, base_url = self.metadata_state.get_metadata_val('base_url')) 
+             N1N_LLM(api_key = api, 
+                model_name = model_name, base_url = base_url) 
              for model_name in self.metadata_state.get_metadata_val('annotation_model')
         ]
 
+        for client in self.annotation_clients:
+            client.set_max_retry(max_retry)
+
+        
         self.audit_client = N1N_LLM(
-            api_key = self.metadata_state.get_metadata_val('api'),
+            api_key = api,
             model_name = self.metadata_state.get_metadata_val('audit_model'),
-            base_url = self.metadata_state.get_metadata_val('base_url'))
+            base_url = base_url)
+        self.audit_client.set_max_retry(max_retry)
+
         
-        self.consensus_client = N1N_LLM(api_key = self.metadata_state.get_metadata_val('api'),
+        self.consensus_client = N1N_LLM(api_key = api,
             model_name = self.metadata_state.get_metadata_val('consensus_model'),
-            base_url = self.metadata_state.get_metadata_val('base_url'))
+            base_url = base_url)
+        self.consensus_client.set_max_retry(max_retry)
         
-        self.report_client = N1N_LLM(api_key = self.metadata_state.get_metadata_val('api'),
+        self.report_client = N1N_LLM(api_key = api,
             model_name = self.metadata_state.get_metadata_val('report_model'),
-            base_url = self.metadata_state.get_metadata_val('base_url'))
+            base_url = base_url)
+        self.report_client.set_max_retry(max_retry)
+
 
     @add_log
     def _initialize_nodes(self):
@@ -95,6 +113,9 @@ class CelltypeWorkflow:
                                       cluster_genes=self.cluster_gene_state.get_cluster_genes(cluster_id))
         
         annotation_results = []
+
+        reliability_threshold = self.metadata_state.get_metadata_val('reliability_threshold')
+        max_reflect_times = self.metadata_state.get_metadata_val('max_reflect_times')
         
         for llm in self.annotation_clients:
             model_name = llm.get_model_info()['model']
@@ -114,7 +135,7 @@ class CelltypeWorkflow:
             score = res_audio['reliability_score']
             reflect_times = 0
 
-            while score < RELIABILITY_THRESHOLD:
+            while score < reliability_threshold:
                 reflect_times += 1
 
                 log_warning(f"模型 {model_name} 不可靠，第 {reflect_times} 次反思修正，cluster 「{cluster_id}」...")
@@ -127,8 +148,8 @@ class CelltypeWorkflow:
 
                 score = res_audio['reliability_score']
 
-                if reflect_times >= MAX_REFLECT_TIMES:
-                    log_warning(f"模型 {model_name} 经过 {MAX_REFLECT_TIMES} 次反思仍不可靠，cluster 「{cluster_id}」标记为 Unreliable，停止反思")
+                if reflect_times >= max_reflect_times:
+                    log_warning(f"模型 {model_name} 经过 {max_reflect_times} 次反思仍不可靠，cluster 「{cluster_id}」标记为 Unreliable，停止反思")
                     cell_type = cluster_state.get_celltype(model_name)
                     cell_subtype = cluster_state.get_cell_subtype(model_name)
 
