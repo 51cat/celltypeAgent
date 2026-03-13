@@ -1,0 +1,18 @@
+{
+    "clister_id": "0",
+    "celltype": "T cells",
+    "subcelltype": "Naive CD4+ T cells",
+    "is_consensus_reached": true,
+    "consensus_proportion": 1.0,
+    "entropy_value": 0.0,
+    "supporting_models": [
+        "gpt-5.4",
+        "claude-sonnet-4-6",
+        "qwen3.5-397b-a17b",
+        "grok-4.2",
+        "glm-5",
+        "deepseek-v3.2"
+    ],
+    "conflicting_models": [],
+    "reasoning": "全部6个模型在主谱系层面完全一致，均将该cluster注释为T细胞（T cells）。亚型层面，所有模型均支持初始（Naive）T细胞特征，其中4个模型（gpt-5.4、claude-sonnet-4-6、grok-4.2及deepseek-v3.2）进一步明确指向CD4+亚型，另外2个模型（qwen3.5-397b-a17b、glm-5）仅注释至Naive T cells层面未区分CD4/CD8。考虑到所有模型的可信度评分均为88分且均通过gene faithfulness和生物学合理性审核，以及MAL+CCR7+LEF1+TCF7的组合对CD4亚型具有偏向性支持，最终共识亚型确定为Naive CD4+ T cells。entropy_value为0.0，因所有模型在主谱系层面完全一致。"
+}

@@ -1,0 +1,21 @@
+{
+    "marker_table": "example_data/test.csv",
+    "api": "sk-VW019xQdJlI0EJKpESIj8UcUYWTMyBop78hsJQ2W5P8ppe3D",
+    "base_url": "https://api.n1n.ai/v1",
+    "parm_collect_model": "gpt-5.4",
+    "annotation_model": [
+        "gpt-5.4",
+        "claude-sonnet-4-6",
+        "qwen3.5-397b-a17b",
+        "grok-4.2",
+        "glm-5",
+        "deepseek-v3.2"
+    ],
+    "audit_model": "claude-sonnet-4-6",
+    "consensus_model": "claude-sonnet-4-6",
+    "report_model": "claude-sonnet-4-6",
+    "outdir": "example_data/test_out//",
+    "spec": "human",
+    "tissue": "pbmc",
+    "language": "中文"
+}

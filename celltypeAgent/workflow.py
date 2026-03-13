@@ -4,6 +4,10 @@ from concurrent.futures import ThreadPoolExecutor
 
 from celltypeAgent import load_json, write_json
 from celltypeAgent.tools.utils import add_log
+from celltypeAgent.tools.logger import (
+    log_info, log_warning, log_success, 
+    display_annotation_table, display_section_header
+)
 from celltypeAgent.state.state import SingleCluster, MetaData, ClusterInfo
 
 from celltypeAgent.llm.n1n import N1N_LLM
@@ -85,34 +89,35 @@ class CelltypeWorkflow:
     @add_log
     def _ann_single_cluster(self, cluster_id = 0):
         
-        # 初始化
+        display_section_header(f"Cluster {cluster_id} 注释流程", "🔬")
+        
         cluster_state = SingleCluster(cluster_id=cluster_id, 
                                       cluster_genes=self.cluster_gene_state.get_cluster_genes(cluster_id))
         
+        annotation_results = []
         
         for llm in self.annotation_clients:
-            # 进行初始注释
             model_name = llm.get_model_info()['model']
+            log_info(f"开始 [bold]{model_name}[/bold] 模型注释 cluster 「{cluster_id}」...", highlight=True)
+            
             cnode = CelltypeAnnoNode(self.metadata_state, cluster_state)
             cnode.set_LLM(llm)
             cnode.prep()
             res_ann = cnode.run()
             cluster_state.update_ann_results(model_name, res_ann)
 
-            # 进行注释评分
             audit_node = CelltypeAnnAuditNode(self.audit_client, self.metadata_state, cluster_state)
             audit_node.prep(model_name)
             res_audio = audit_node.run()
             cluster_state.update_audit_results(model_name, res_audio)
 
-            # 反思修正注释结果
             score = res_audio['reliability_score']
             reflect_times = 0
 
             while score < RELIABILITY_THRESHOLD:
                 reflect_times += 1
 
-                self._ann_single_cluster.logger.info(f"模型 {model_name} 的注释结果被评为不可靠，正在进行第{reflect_times}次反思修正...")
+                log_warning(f"模型 {model_name} 不可靠，第 {reflect_times} 次反思修正，cluster 「{cluster_id}」...")
                 
                 res_ann = cnode.reflect_ann(res_ann)
                 cluster_state.update_ann_results(model_name, res_ann)
@@ -123,7 +128,7 @@ class CelltypeWorkflow:
                 score = res_audio['reliability_score']
 
                 if reflect_times >= MAX_REFLECT_TIMES:
-                    self._ann_single_cluster.logger.warning(f"模型 {model_name} 的注释结果经过 {MAX_REFLECT_TIMES} 次反思修正后仍被评为不可靠，停止反思修正。本次注释标记为不可靠。")
+                    log_warning(f"模型 {model_name} 经过 {MAX_REFLECT_TIMES} 次反思仍不可靠，cluster 「{cluster_id}」标记为 Unreliable，停止反思")
                     cell_type = cluster_state.get_celltype(model_name)
                     cell_subtype = cluster_state.get_cell_subtype(model_name)
 
@@ -131,32 +136,41 @@ class CelltypeWorkflow:
                     cluster_state.update_cell_subtype(model_name, f'(Unreliable)_{cell_subtype}')
                     break
 
-            self._ann_single_cluster.logger.info(f"模型 {model_name} 的注释结果已完成，可靠性评分为 {score}。")
+            log_success(f"模型 {model_name} 完成 cluster 「{cluster_id}」，可靠性评分: {score}")
+            
+            annotation_results.append({
+                "model": model_name,
+                "cell_type": cluster_state.get_celltype(model_name),
+                "cell_subtype": cluster_state.get_cell_subtype(model_name),
+                "score": score
+            })
         
-        self._ann_single_cluster.logger.info(f"cluster: {cluster_id} {model_name} 的注释和审核流程已完成，开始进行共识检验...")
+        display_annotation_table(annotation_results, f"Cluster {cluster_id} 注释结果")
         
-        # 共识检验
+        log_info(f"开始共识检验...", highlight=True)
+        
         connode = CelltypeConsensusNode(self.consensus_client, self.metadata_state, cluster_state)
         connode.prep()
         res_con = connode.run()
         cluster_state.updata_consensus_results(res_con)
 
-        self._ann_single_cluster.logger.info(f"cluster: {cluster_id} 的共识检验已完成，开始生成报告...")
+        log_success(f"共识检验完成")
 
-        # 输出报告
+        log_info(f"生成报告...", highlight=True)
+        
         rnode = CelltypeReportNode(self.report_client, cluster_state)
         rnode.prep()
         res_report = rnode.run()
 
-        self._ann_single_cluster.logger.info(f"cluster: {cluster_id} 的报告已生成，开始保存结果...")
-
-        # save resluts
         outdir = self.metadata_state.get_metadata_val('outdir')
         log_outdir = f"{outdir}/log/{cluster_id}/"
         report_dir = f"{outdir}/report/"
 
         if not os.path.exists(log_outdir):
-            os.makedirs(outdir, exist_ok=True)
+            os.makedirs(log_outdir, exist_ok=True)
+        
+        if not os.path.exists(report_dir):
+            os.makedirs(report_dir, exist_ok=True)
         
         write_json(cluster_state.ann_to_dict(), f"{log_outdir}/ann_results.json")
         write_json(cluster_state.audit_to_dict(), f"{log_outdir}/audit_results.json")
@@ -165,6 +179,8 @@ class CelltypeWorkflow:
 
         with open(f"{report_dir}/report_{cluster_id}.md", 'w', encoding='utf-8') as f:
             f.write(res_report)
+        
+        log_success(f"Cluster {cluster_id} 处理完成，结果已保存")
         
                 
     @add_log
@@ -184,18 +200,5 @@ class CelltypeWorkflow:
     def multi_cluster_annotation(self):
         cluster_ids = self.cluster_gene_state.get_all_cluster()
 
-        with ThreadPoolExecutor(max_workers=min(len(cluster_ids), 4)) as executor:
-            executor.map(self._ann_single_cluster, cluster_ids)
-
-def main():
-
-    INPUT_DATA = f"{os.path.dirname(os.path.dirname(__file__))}/example_data/test.csv"
-
-    runner = CelltypeWorkflow(INPUT_DATA, 'work3/')
-
-    runner.collect_parms()
-    runner._ann_single_cluster(0)
-
-
-if __name__ == "__main__":
-    main()
+        for cluster_id in cluster_ids:
+            self._ann_single_cluster(cluster_id)

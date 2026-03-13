@@ -36,16 +36,19 @@ def collect_parms(p_type_column, cluster_column, gene_column, ntop, fc_column, s
     
     df_filtered = df[df[p_type_column] < 0.05].copy()
     
-    top_genes = (
-        df_filtered.groupby(cluster_column, group_keys=True)
-        .apply(lambda x: x.nlargest(ntop, fc_column))
-    ).reset_index()
+    # 修改部分：使用更稳定的groupby操作
+    top_genes = []
+    for cluster, group in df_filtered.groupby(cluster_column):
+        top_cluster_genes = group.nlargest(ntop, fc_column)
+        top_genes.append(top_cluster_genes)
+    
+    top_genes = pd.concat(top_genes, axis=0).reset_index(drop=True)
     
     result = top_genes[[cluster_column, gene_column]]
     final_dict = result.groupby(cluster_column)[gene_column].apply(list).to_dict()
     final_dict_out = {}
     
-    final_dict_out.update({"metadata":{"spec": spec, "tissue": tissue, "language": language}})
-    final_dict_out.update({"cluster":final_dict})
+    final_dict_out.update({"metadata": {"spec": spec, "tissue": tissue, "language": language}})
+    final_dict_out.update({"cluster": final_dict})
     
     return final_dict_out

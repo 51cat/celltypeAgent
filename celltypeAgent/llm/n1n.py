@@ -1,7 +1,16 @@
+import time
 from typing import Dict, Any
 from openai import OpenAI
 from celltypeAgent.llm.base import BaseLLM
 from celltypeAgent.llm.message import Message
+from celltypeAgent.tools.logger import (
+    console, print_stream_header, print_stream_footer, 
+    wait_animation, is_valid_response, log_retry, log_error
+)
+
+
+MAX_RETRIES = 3
+
 
 class N1N_LLM(BaseLLM):
     def __init__(self, api_key: str, model_name: str | None = None, base_url = None):
@@ -15,25 +24,60 @@ class N1N_LLM(BaseLLM):
     
     def invoke_stream(self, message_input: Message, **kwargs):
 
-        response = self.client.chat.completions.create(
-            model=self.model_name,
-            messages=message_input.message, stream = True)
+        print_stream_header(self.model_name)
 
-        full_content = ""
-        for chunk in response:
-            if chunk.choices[0].delta.content:
-                content_piece = chunk.choices[0].delta.content
-                print(content_piece, end="", flush=True) 
-                full_content += content_piece
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                with wait_animation():
+                    response = self.client.chat.completions.create(
+                        model=self.model_name,
+                        messages=message_input.message, stream=True)
+
+                    full_content = ""
+                    for chunk in response:
+                        if chunk.choices[0].delta.content:
+                            full_content += chunk.choices[0].delta.content
                 
-        return full_content
+                if is_valid_response(full_content):
+                    console.print(full_content, style="white")
+                    print_stream_footer()
+                    return full_content
+                else:
+                    raise ValueError("无效响应")
+                    
+            except Exception as e:
+                if attempt < MAX_RETRIES:
+                    delay = 2 ** (attempt - 1)
+                    log_retry(attempt + 1, delay, type(e).__name__)
+                    time.sleep(delay)
+                else:
+                    log_error(f"重试 {MAX_RETRIES} 次后仍失败")
+                    print_stream_footer()
+                    raise
     
     def invoke(self, message_input: Message, **kwargs):
 
-        response = self.client.chat.completions.create(
-            model=self.model_name,
-            messages=message_input.message, stream = False)
-        return response.choices[0].message.content
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=message_input.message, stream=False)
+                
+                content = response.choices[0].message.content
+                
+                if is_valid_response(content):
+                    return content
+                else:
+                    raise ValueError("无效响应")
+                    
+            except Exception as e:
+                if attempt < MAX_RETRIES:
+                    delay = 2 ** (attempt - 1)
+                    log_retry(attempt + 1, delay, type(e).__name__)
+                    time.sleep(delay)
+                else:
+                    log_error(f"重试 {MAX_RETRIES} 次后仍失败")
+                    raise
 
 
     def get_model_info(self) -> Dict[str, Any]:

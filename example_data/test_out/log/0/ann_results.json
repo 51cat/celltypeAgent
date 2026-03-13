@@ -1,0 +1,62 @@
+{
+    "gpt-5.4": {
+        "cluster_name": "0",
+        "cell_type": "T cells",
+        "cell_subtype": "Naive / central memory CD4+ T cells",
+        "reasoning": {
+            "lineage_determination": "该群细胞高表达 CCR7、LEF1、TCF7、TRAT1、MAL 和 IL6ST，明确指向 T 细胞谱系。其中 TRAT1 为 TCR 相关分子，CCR7、LEF1 和 TCF7 是典型的初始/淋巴归巢型 T 细胞相关标志，支持其属于外周血中的 T cells。",
+            "subtype_refinement": "在 T 细胞基础上，CCR7、LEF1、TCF7、MAL、TRABD2A 和 RCAN3 的组合更符合初始或中央记忆样 T 细胞特征，尤其是 CCR7、TCF7、LEF1 反映较早分化、淋巴结归巢和干样状态。结合 PBMC 来源，该群最可能为 naive / central memory CD4+ T cells，而非活化效应型 T 细胞。",
+            "functional_state": "该群未见明显细胞周期基因富集，也无显著线粒体/核糖体应激特征；marker 主要反映静息、未充分分化的 T 细胞状态，不支持 doublet、低质量或增殖细胞。"
+        }
+    },
+    "claude-sonnet-4-6": {
+        "cluster_name": "0",
+        "cell_type": "T cell",
+        "cell_subtype": "Naive CD4+ T cell",
+        "reasoning": {
+            "lineage_determination": "多个关键marker基因强烈支持T细胞谱系：CCR7是T细胞归巢受体，在初始和中央记忆T细胞中高表达；TCF7（编码TCF1转录因子）是T细胞发育和初始T细胞维持的核心转录因子；LEF1是TCF/LEF家族成员，在初始T细胞中高表达；TRAT1（T细胞受体相关跨膜接头蛋白1）为T细胞特异性信号分子。以上基因组合明确指向T细胞谱系。",
+            "subtype_refinement": "进一步细化亚型的证据：LEF1和TCF7在CD4+ naive T细胞中表达水平显著高于CD8+ T细胞及记忆T细胞；CCR7高表达提示初始或中央记忆表型，结合LEF1/TCF7的高表达倾向于naive T细胞；MAL（T细胞分化蛋白）在naive CD4+ T细胞中特异性高表达，是该亚型的重要marker；TRABD2A在naive T细胞中有报道表达；IL6ST（gp130）参与细胞因子信号传导，在naive T细胞存活中有一定作用；RCAN3参与钙调磷酸酶信号调控，与T细胞活化阈值调控相关。综合来看，MAL+CCR7+LEF1+TCF7的组合强烈指向Naive CD4+ T细胞。",
+            "functional_state": "该cluster处于静息初始状态，表达CCR7和LEF1/TCF7等维持naive表型的关键转录因子，未见明显活化或效应功能相关基因，提示其为功能静息的初始CD4+ T细胞，具备正常的淋巴结归巢和稳态维持能力。"
+        }
+    },
+    "qwen3.5-397b-a17b": {
+        "cluster_name": "0",
+        "cell_type": "T cells",
+        "cell_subtype": "Naive T cells",
+        "reasoning": {
+            "lineage_determination": "关键 marker 基因 TCF7、LEF1、CCR7 和 TRAT1 强烈指示 T 细胞谱系。TCF7 和 LEF1 是 T 细胞发育和维持的关键转录因子，CCR7 是淋巴细胞归巢受体，TRAT1 是 T 细胞特异性跨膜衔接蛋白，这些基因共同确立了 T 细胞身份。",
+            "subtype_refinement": "CCR7 与 TCF7 的高表达组合是初始 T 细胞（Naive T cells）的典型特征，表明细胞具有淋巴结归巢能力且未分化。LEF1 也在初始 T 细胞中高表达，共同支持初始状态鉴定。",
+            "functional_state": "提供的 marker 基因主要涉及细胞身份维持和信号转导，无细胞周期或应激相关基因，表明细胞处于静息状态。"
+        }
+    },
+    "grok-4.2": {
+        "cluster_name": "0",
+        "cell_type": "T细胞",
+        "cell_subtype": "CD4+幼稚T细胞",
+        "reasoning": {
+            "lineage_determination": "根据提供的DEGs中TRAT1（T细胞受体相关跨膜衔接蛋白，为T细胞特异性标记）、MAL（CD4+ T细胞常用marker）、LEF1和TCF7（T淋巴细胞关键转录因子）以及CCR7（T细胞趋化因子受体），这些均为T细胞谱系的canonical marker基因，支持该cluster明确属于T细胞大类。",
+            "subtype_refinement": "在T细胞大类基础上，进一步观察到CCR7、LEF1、TCF7及MAL的高表达，这些基因组合是PBMC中CD4+幼稚T细胞（naive CD4+ T cells）的特异性特征，支持细化亚型为CD4+幼稚T细胞。",
+            "functional_state": "marker列表中无细胞周期相关基因主导、无应激或线粒体基因富集，亦无多谱系marker混杂，符合正常静息功能状态。"
+        }
+    },
+    "glm-5": {
+        "cluster_name": "0",
+        "cell_type": "T cells",
+        "cell_subtype": "Naive T cells",
+        "reasoning": {
+            "lineage_determination": "该 cluster 高表达典型的 T 淋巴细胞标志物，包括转录因子 LEF1 和 TCF7，以及 T 细胞受体相关蛋白 TRAT1。这些基因共同确立了该群细胞属于 T 细胞谱系。",
+            "subtype_refinement": "关键 marker 基因 CCR7、LEF1、TCF7 和 MAL 的高表达是初始 T 细胞（Naive T cells）的典型特征。CCR7 是细胞归巢至淋巴结的关键趋化因子受体，与 LEF1 和 TCF7 共同维持细胞的静息状态和未分化表型。ITGA6 和 MAL 也常见于初始 T 细胞群体中。尽管存在 COL18A1，但鉴于其他核心初始 T 细胞标志物的强一致性，该群细胞主要判定为初始 T 细胞。",
+            "functional_state": "细胞处于静息或未分化状态，具备循环和归巢至次级淋巴器官的能力。"
+        }
+    },
+    "deepseek-v3.2": {
+        "cluster_name": "0",
+        "cell_type": "T cells",
+        "cell_subtype": "Naive/central memory T cells",
+        "reasoning": {
+            "lineage_determination": "该 cluster 高表达典型的 T 细胞 marker 基因，如 TRABD2A, LEF1, TCF7, TRAT1。其中 LEF1 和 TCF7 是 T 细胞发育和功能的关键转录因子，TRAT1 是 T 细胞受体相关蛋白，强烈支持该 cluster 属于 T 细胞谱系。",
+            "subtype_refinement": "MAL 和 CCR7 是 naive T 细胞和 central memory T 细胞的经典标志物。CCR7 促进 T 细胞向淋巴组织迁移，是 naive/central memory 状态的关键特征。LEF1 和 TCF7 进一步支持 naive 或未活化状态。高表达的 IL6ST (gp130) 也与 T 细胞功能相关。这些基因共同指向 naive/central memory T 细胞亚型。",
+            "functional_state": "未发现明显的周期、应激或双谱系 marker。基因 COL18A1 和 ITGA6 (胶原和整合素) 在某些 T 细胞亚群中也有报道，可能涉及迁移或相互作用，但不足以否定 T 细胞的整体判定。因此，功能性状态推断为稳态（非增殖、非应激）。"
+        }
+    }
+}

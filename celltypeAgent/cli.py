@@ -1,5 +1,5 @@
 import click
-
+import time
 from celltypeAgent.workflow import CelltypeWorkflow
 from celltypeAgent.tools.logger import (
     console, log_error, log_success, display_status_panel
@@ -37,7 +37,7 @@ def annotate(input_file, output, provider):
         console.print("[bold magenta]✨ 初始化工作流...[/bold magenta]")
         
         runner = CelltypeWorkflow(input_file, output, provider)
-        
+        time.sleep(10) 
         console.print()
         console.print("[bold magenta]✨ 开始参数收集...[/bold magenta]")
         

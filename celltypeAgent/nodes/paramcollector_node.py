@@ -3,6 +3,9 @@ from celltypeAgent.prompt.prompt import PARAM_COLLECTOR_PROMPT
 from celltypeAgent.llm.message import Message
 from celltypeAgent.llm.tool import Tool
 from celltypeAgent.state.state import MetaData
+from celltypeAgent.tools.logger import (
+    chat_session_header, chat_user_input, chat_ai_chunk
+)
 
 from celltypeAgent.tools.agent_tools import collect_parms
 from celltypeAgent.tools.utils import extract_and_validate_json, \
@@ -20,6 +23,8 @@ class ParamCollectorNode:
         self.table_summary = get_table_context(self.marker_table)
     
     def run(self):
+        chat_session_header()
+        
         tools_input = Tool([collect_parms]).desc
         message_input = Message(system_prompt=PARAM_COLLECTOR_PROMPT.format(tools_desc=tools_input))
 
@@ -27,6 +32,8 @@ class ParamCollectorNode:
         
 
         while True:
+            console = self.llm._get_console() if hasattr(self.llm, '_get_console') else None
+            
             response = self.llm.invoke_stream(message_input)
 
             final_params = extract_and_validate_json(response)
@@ -36,7 +43,7 @@ class ParamCollectorNode:
 
             message_input.add_ai_message(response)
 
-            user_input = input("\n\n[You]:\n\n")
+            user_input = chat_user_input()
             message_input.add_user_message(user_input)
         
 

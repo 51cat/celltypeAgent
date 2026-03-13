@@ -1,0 +1,38 @@
+{
+    "gpt-5.4": {
+        "is_gene_faithful": true,
+        "is_biologically_valid": true,
+        "reliability_score": 88,
+        "audit_reasoning": "模型推理中使用的证据基因（CCR7、LEF1、TCF7、TRAT1、MAL、IL6ST、TRABD2A、RCAN3）均来自提供的Marker Gene List，未见Gene Hallucination。CCR7、LEF1、TCF7三者共同高表达是naive/central memory T细胞的经典特征，TRAT1作为TCR信号相关分子明确支持T细胞谱系，MAL和TRABD2A亦有文献报道富集于naive CD4+ T细胞，整体marker组合高度支持该注释结论。PBMC中naive/central memory CD4+ T细胞为主要组成成分，细胞类型存在合理性无疑。轻微扣分原因在于COL18A1和ITGA6（来自Marker Gene List）在推理中未被讨论，此两个基因在T细胞中表达证据相对有限，略带混合信号可能，但不足以推翻整体注释。"
+    },
+    "claude-sonnet-4-6": {
+        "is_gene_faithful": true,
+        "is_biologically_valid": true,
+        "reliability_score": 88,
+        "audit_reasoning": "注释推理主要依赖Marker Gene List中的基因作为证据，未发现明显的gene hallucination。CCR7、LEF1、TCF7三个基因均为已知的naive T细胞及中央记忆T细胞的经典marker，组合出现强烈支持T细胞谱系。MAL作为naive CD4+ T细胞的特异性marker，与LEF1、TCF7共同指向naive CD4+ T细胞亚型，证据链完整。TRAT1为T细胞特异性信号分子，进一步支持T细胞谱系判断；IL6ST和RCAN3在T细胞中有功能报道，但特异性相对较弱，未对结论造成干扰。Naive CD4+ T细胞在PBMC中是正常存在的主要细胞群体，与组织来源完全吻合，注释结论生物学上合理可信。略扣分原因在于列表中缺乏CD4特异性marker（如CD4本身），无法排除naive CD8+ T细胞的可能性，但MAL+LEF1高表达组合对CD4亚型有一定偏向性支持。"
+    },
+    "qwen3.5-397b-a17b": {
+        "is_gene_faithful": true,
+        "is_biologically_valid": true,
+        "reliability_score": 88,
+        "audit_reasoning": "注释推理中使用的关键证据基因 TCF7、LEF1、CCR7、TRAT1 均来自 Marker Gene List，未发现 Gene Hallucination。TCF7 和 LEF1 是 Naive T 细胞的核心转录因子，CCR7 是初始/中央记忆 T 细胞的归巢受体，三者组合强烈支持 Naive T 细胞注释。IL6ST 参与细胞因子信号传导，RCAN3 在静息 T 细胞中有表达，TRAT1 为 T 细胞特异性衔接蛋白，进一步支持 T 细胞谱系。MAL 和 TRABD2A 在 Naive T 细胞中也有报道，与注释结果一致。Naive T 细胞是 PBMC 中的主要组成成分，生物学合理性充分，但 CCR7 同时存在于中央记忆 T 细胞，单独不足以区分 Naive 与 TCM，导致亚型特异性略有不确定性，因此评分未达满分。"
+    },
+    "grok-4.2": {
+        "is_gene_faithful": true,
+        "is_biologically_valid": true,
+        "reliability_score": 88,
+        "audit_reasoning": "注释推理主要依赖Marker Gene List中的基因，未出现Gene Hallucination。列表中CCR7为淋巴结归巢趋化因子受体，LEF1和TCF7均为幼稚T细胞的关键转录因子，MAL为CD4+ T细胞经典marker，TRAT1为T细胞受体相关衔接蛋白，这五个基因组合高度支持CD4+幼稚T细胞的注释。TRABD2A、RCAN3、IL6ST、ITGA6和COL18A1虽未被详细解释，但前三者在T细胞中亦有报道，不构成矛盾信号。CD4+幼稚T细胞是PBMC中最常见的细胞亚群之一，符合已发表的人类PBMC单细胞图谱常识，生物学合理性高；略微扣分原因是部分列表基因（如ITGA6、COL18A1）的解读未被涉及，存在一定不确定性。"
+    },
+    "glm-5": {
+        "is_gene_faithful": true,
+        "is_biologically_valid": true,
+        "reliability_score": 88,
+        "audit_reasoning": "模型推理所引用的证据基因（CCR7、LEF1、TCF7、TRAT1、MAL、ITGA6、COL18A1）均来自 Marker Gene List，未发现 gene hallucination。Marker Gene List 中的 CCR7、LEF1、TCF7 是 Naive T 细胞的经典标志物，TRAT1 为 T 细胞受体信号相关蛋白，MAL 在初始 T 细胞中有报道表达，这些基因共同强力支持 Naive T cells 的注释结论。IL6ST、RCAN3、TRABD2A 等未被重点引用，但不影响整体判断。COL18A1 在 T 细胞中表达相对少见，略微降低了特异性，但鉴于核心 Naive T 细胞 marker 的高度一致性，整体注释在 PBMC 背景下生物学上合理可信。"
+    },
+    "deepseek-v3.2": {
+        "is_gene_faithful": true,
+        "is_biologically_valid": true,
+        "reliability_score": 88,
+        "audit_reasoning": "AI模型的推理主要依赖Marker Gene List中的基因作为证据，未出现显著的gene hallucination问题。列表中的LEF1、TCF7为T细胞发育关键转录因子，CCR7是naive/central memory T细胞的经典迁移受体，MAL在naive T细胞中高表达，TRAT1（TRIM）是TCR信号复合体相关蛋白，这些基因共同强力支持naive/central memory T细胞的注释。IL6ST和TRABD2A在T细胞中亦有报道，整体证据链条完整。COL18A1和ITGA6在T细胞中表达相对非特异，可能略微引入混合信号的可能性，但不足以否定整体结论。Naive/central memory T细胞在PBMC中是常见且合理的细胞类型，与已发表的人类PBMC单细胞图谱完全一致。"
+    }
+}
